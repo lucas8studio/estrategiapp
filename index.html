@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Gastos Hormiga</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#12151A">
+<style>
+  :root{
+    --bg:#12151A;
+    --surface:#1B2028;
+    --surface-2:#232A34;
+    --line:#2C3542;
+    --text:#EDEBE6;
+    --muted:#7C8592;
+    --accent:#E3A23C;
+    --accent-ink:#12151A;
+    --danger:#D9695F;
+    --success:#4E9E6D;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+  }
+  #app{
+    width:100%;
+    max-width:480px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    padding:0 20px 40px;
+  }
+
+  /* ---------- Login ---------- */
+  #login-screen{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    min-height:100vh;
+    gap:16px;
+  }
+  #login-screen h1{
+    font-size:22px;
+    font-weight:600;
+    margin:0 0 4px;
+  }
+  #login-screen p{
+    color:var(--muted);
+    font-size:14px;
+    margin:0 0 12px;
+    line-height:1.5;
+  }
+  input[type=email], input[type=password], input[type=text]{
+    background:var(--surface);
+    border:1px solid var(--line);
+    color:var(--text);
+    font-size:16px;
+    padding:14px 16px;
+    border-radius:10px;
+    width:100%;
+  }
+  input:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  button{
+    font-family:inherit;
+    cursor:pointer;
+  }
+  .btn-primary{
+    background:var(--accent);
+    color:var(--accent-ink);
+    border:none;
+    font-size:16px;
+    font-weight:600;
+    padding:15px 16px;
+    border-radius:10px;
+    width:100%;
+  }
+  .btn-primary:active{transform:scale(0.98);}
+  .btn-primary:disabled{opacity:.5;}
+  #login-error{
+    color:var(--danger);
+    font-size:13px;
+    min-height:18px;
+  }
+
+  /* ---------- Main ---------- */
+  header{
+    padding:24px 0 12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+  }
+  header .label{
+    font-size:13px;
+    color:var(--muted);
+  }
+  header .today{
+    font-size:15px;
+    font-weight:600;
+  }
+  #signout{
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:13px;
+    text-decoration:underline;
+    padding:4px;
+  }
+
+  .hero-amount{
+    text-align:center;
+    padding:18px 0 8px;
+  }
+  .hero-amount .peso{
+    font-size:22px;
+    color:var(--muted);
+    vertical-align:top;
+    margin-right:4px;
+  }
+  #amount{
+    background:none;
+    border:none;
+    color:var(--text);
+    font-size:56px;
+    font-weight:600;
+    width:100%;
+    text-align:center;
+    -moz-appearance:textfield;
+  }
+  #amount::-webkit-outer-spin-button,
+  #amount::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
+  #amount:focus{outline:none;}
+  #amount::placeholder{color:#3A4250;}
+
+  .field-label{
+    font-size:12px;
+    color:var(--muted);
+    margin:18px 0 8px;
+  }
+
+  .chips{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:4px;
+    -ms-overflow-style:none;
+    scrollbar-width:none;
+  }
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{
+    flex:0 0 auto;
+    background:var(--surface);
+    border:1px solid var(--line);
+    color:var(--text);
+    font-size:14px;
+    padding:9px 16px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .chip.selected{
+    background:var(--accent);
+    color:var(--accent-ink);
+    border-color:var(--accent);
+    font-weight:600;
+  }
+
+  select{
+    background:var(--surface);
+    border:1px solid var(--line);
+    color:var(--text);
+    font-size:15px;
+    padding:12px 14px;
+    border-radius:10px;
+    width:100%;
+    appearance:none;
+  }
+
+  #descripcion{margin-top:0;}
+
+  #save-btn{margin-top:26px;}
+  #save-feedback{
+    text-align:center;
+    font-size:13px;
+    color:var(--success);
+    min-height:18px;
+    margin-top:8px;
+  }
+
+  .divider{
+    border:none;
+    border-top:1px solid var(--line);
+    margin:32px 0 18px;
+  }
+
+  .totals{
+    display:flex;
+    gap:12px;
+    margin-bottom:22px;
+  }
+  .totals .box{
+    flex:1;
+    background:var(--surface);
+    border-radius:10px;
+    padding:14px 16px;
+  }
+  .totals .box .n{
+    font-size:20px;
+    font-weight:600;
+  }
+  .totals .box .l{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:2px;
+  }
+
+  #list-label{
+    font-size:13px;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .entry{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .entry .left .cat{font-size:15px; font-weight:500;}
+  .entry .left .desc{font-size:13px; color:var(--muted); margin-top:2px;}
+  .entry .right{font-size:15px; font-weight:600; white-space:nowrap; margin-left:12px;}
+  #empty-state{
+    color:var(--muted);
+    font-size:14px;
+    text-align:center;
+    padding:24px 0;
+  }
+
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- LOGIN -->
+  <div id="login-screen">
+    <h1>Gastos Hormiga</h1>
+    <p>Cargá acá los gastos chicos del día a día. Se guardan en tu cuenta y aparecen solos en tu planilla.</p>
+    <input type="email" id="login-email" placeholder="Email" autocomplete="username">
+    <input type="password" id="login-password" placeholder="Contraseña" autocomplete="current-password">
+    <div id="login-error"></div>
+    <button class="btn-primary" id="login-btn">Entrar</button>
+  </div>
+
+  <!-- APP -->
+  <div id="main-screen" class="hidden">
+    <header>
+      <div>
+        <div class="label">Hoy</div>
+        <div class="today" id="today-date"></div>
+      </div>
+      <button id="signout">Salir</button>
+    </header>
+
+    <form id="gasto-form">
+      <div class="hero-amount">
+        <input type="number" id="amount" placeholder="0" inputmode="decimal" step="1" min="0" required>
+      </div>
+
+      <div class="field-label">Categoría</div>
+      <div class="chips" id="chips"></div>
+
+      <div class="field-label">Descripción (opcional)</div>
+      <input type="text" id="descripcion" placeholder="Ej: café con un amigo">
+
+      <div class="field-label">Medio de pago</div>
+      <select id="medio-pago">
+        <option>Efectivo</option>
+        <option>Débito</option>
+        <option>Crédito</option>
+        <option>Mercado Pago</option>
+        <option>Transferencia</option>
+      </select>
+
+      <button type="submit" class="btn-primary" id="save-btn">Guardar gasto</button>
+      <div id="save-feedback"></div>
+    </form>
+
+    <hr class="divider">
+
+    <div class="totals">
+      <div class="box">
+        <div class="n" id="total-hoy">$0</div>
+        <div class="l">Gastado hoy</div>
+      </div>
+      <div class="box">
+        <div class="n" id="total-mes">$0</div>
+        <div class="l">Gastado este mes</div>
+      </div>
+    </div>
+
+    <div id="list-label">Últimos gastos</div>
+    <div id="entries-list"></div>
+    <div id="empty-state" class="hidden">Todavía no cargaste ningún gasto.</div>
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import {
+    getFirestore, collection, addDoc, query, where, orderBy,
+    onSnapshot, Timestamp
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  // ---------------------------------------------------------------
+  // TODO: pegá acá la configuración de TU proyecto de Firebase.
+  // La sacás de: Firebase Console > Configuración del proyecto > Tus apps > SDK setup.
+  // Estos valores NO son secretos (son públicos por diseño en apps web de Firebase);
+  // lo que te protege de verdad son las Reglas de Seguridad de Firestore (firestore.rules).
+  // ---------------------------------------------------------------
+  const firebaseConfig = {
+    apiKey: "AIzaSyBmVf_CEYFpxPxAuVuYapQgYLlfC117zNI",
+    authDomain: "estrategiapp-2c3eb.firebaseapp.com",
+    projectId: "estrategiapp-2c3eb",
+    storageBucket: "estrategiapp-2c3eb.firebasestorage.app",
+    messagingSenderId: "693375857671",
+    appId: "1:693375857671:web:10d9976add285d73baa6a2"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const CATEGORIAS = ["Café","Kiosco","Delivery","Transporte","Salidas","Antojos","Otros"];
+  let selectedCategoria = CATEGORIAS[0];
+  let unsubscribeEntries = null;
+
+  const $ = (id) => document.getElementById(id);
+
+  // ---------- Login ----------
+  $("login-btn").addEventListener("click", async () => {
+    const email = $("login-email").value.trim();
+    const password = $("login-password").value;
+    $("login-error").textContent = "";
+    if(!email || !password){
+      $("login-error").textContent = "Completá email y contraseña.";
+      return;
+    }
+    try{
+      await signInWithEmailAndPassword(auth, email, password);
+    }catch(err){
+      $("login-error").textContent = "No pudimos entrar: revisá tu email y contraseña.";
+      console.error(err);
+    }
+  });
+
+  $("signout").addEventListener("click", () => signOut(auth));
+
+  onAuthStateChanged(auth, (user) => {
+    if(user){
+      $("login-screen").classList.add("hidden");
+      $("main-screen").classList.remove("hidden");
+      initMainScreen(user.uid);
+    } else {
+      $("main-screen").classList.add("hidden");
+      $("login-screen").classList.remove("hidden");
+      if(unsubscribeEntries) unsubscribeEntries();
+    }
+  });
+
+  // ---------- Chips ----------
+  function renderChips(){
+    const wrap = $("chips");
+    wrap.innerHTML = "";
+    CATEGORIAS.forEach(cat => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip" + (cat === selectedCategoria ? " selected" : "");
+      chip.textContent = cat;
+      chip.addEventListener("click", () => {
+        selectedCategoria = cat;
+        renderChips();
+      });
+      wrap.appendChild(chip);
+    });
+  }
+
+  // ---------- Fecha ----------
+  function hoyISO(){
+    const d = new Date();
+    return d.toISOString().slice(0,10);
+  }
+  function formatMoney(n){
+    return "$" + Math.round(n).toLocaleString("es-AR");
+  }
+
+  // ---------- Main screen ----------
+  function initMainScreen(uid){
+    renderChips();
+    $("today-date").textContent = new Date().toLocaleDateString("es-AR", {
+      weekday:"long", day:"numeric", month:"long"
+    });
+
+    const gastosRef = collection(db, "users", uid, "gastos");
+
+    if(unsubscribeEntries) unsubscribeEntries();
+    const q = query(gastosRef, orderBy("fecha", "desc"), orderBy("creadoEn", "desc"));
+    unsubscribeEntries = onSnapshot(q, (snap) => {
+      const items = [];
+      snap.forEach(doc => items.push(doc.data()));
+      renderList(items);
+      renderTotals(items);
+    });
+
+    $("gasto-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const monto = parseFloat($("amount").value);
+      if(!monto || monto <= 0) return;
+
+      const btn = $("save-btn");
+      btn.disabled = true;
+      try{
+        await addDoc(gastosRef, {
+          fecha: hoyISO(),
+          categoria: selectedCategoria,
+          descripcion: $("descripcion").value.trim(),
+          monto: monto,
+          medioPago: $("medio-pago").value,
+          creadoEn: Timestamp.now()
+        });
+        $("amount").value = "";
+        $("descripcion").value = "";
+        $("save-feedback").textContent = "Guardado ✓";
+        setTimeout(() => $("save-feedback").textContent = "", 1800);
+      }catch(err){
+        $("save-feedback").textContent = "No se pudo guardar, probá de nuevo.";
+        console.error(err);
+      }finally{
+        btn.disabled = false;
+      }
+    };
+  }
+
+  function renderList(items){
+    const list = $("entries-list");
+    const empty = $("empty-state");
+    list.innerHTML = "";
+    if(items.length === 0){
+      empty.classList.remove("hidden");
+      return;
+    }
+    empty.classList.add("hidden");
+    items.slice(0, 20).forEach(g => {
+      const row = document.createElement("div");
+      row.className = "entry";
+      row.innerHTML = `
+        <div class="left">
+          <div class="cat">${g.categoria}</div>
+          <div class="desc">${g.descripcion ? g.descripcion : g.medioPago} · ${g.fecha}</div>
+        </div>
+        <div class="right">${formatMoney(g.monto)}</div>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  function renderTotals(items){
+    const today = hoyISO();
+    const mesActual = today.slice(0,7); // YYYY-MM
+    let totalHoy = 0, totalMes = 0;
+    items.forEach(g => {
+      if(g.fecha === today) totalHoy += g.monto;
+      if(g.fecha && g.fecha.slice(0,7) === mesActual) totalMes += g.monto;
+    });
+    $("total-hoy").textContent = formatMoney(totalHoy);
+    $("total-mes").textContent = formatMoney(totalMes);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "Gastos Hormiga",
+  "short_name": "Hormiga",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#12151A",
+  "theme_color": "#12151A",
+  "icons": []
+}
