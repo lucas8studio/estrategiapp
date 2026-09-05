@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Gastos Hormiga</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#12151A">
+<meta name="theme-color" content="#FFFFFF">
 <style>
   :root{
-    --bg:#12151A;
-    --surface:#1B2028;
-    --surface-2:#232A34;
-    --line:#2C3542;
-    --text:#EDEBE6;
-    --muted:#7C8592;
-    --accent:#E3A23C;
-    --accent-ink:#12151A;
-    --danger:#D9695F;
-    --success:#4E9E6D;
+    --bg:#FFFFFF;
+    --surface:#F4F2ED;
+    --surface-2:#EAE7DE;
+    --line:#DEDAD0;
+    --text:#1B1F24;
+    --muted:#6B7280;
+    --accent:#D98A1F;
+    --accent-ink:#1B1F24;
+    --danger:#C0392B;
+    --success:#1F8A4C;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -37,7 +37,7 @@
     flex-direction:column;
     padding:0 20px 40px;
   }
- 
+
   /* ---------- Login ---------- */
   #login-screen{
     display:flex;
@@ -88,7 +88,7 @@
     font-size:13px;
     min-height:18px;
   }
- 
+
   /* ---------- Main ---------- */
   header{
     padding:24px 0 12px;
@@ -112,7 +112,34 @@
     text-decoration:underline;
     padding:4px;
   }
- 
+
+  .compare-card{
+    background:var(--surface);
+    border-radius:12px;
+    padding:14px 16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:14px;
+  }
+  .compare-card .label{
+    font-size:12px;
+    color:var(--muted);
+  }
+  .compare-card .delta{
+    font-size:17px;
+    font-weight:700;
+    margin-top:2px;
+  }
+  .compare-card .delta.up{color:var(--danger);}
+  .compare-card .delta.down{color:var(--success);}
+  .compare-card .delta.neutral{color:var(--text);}
+  .compare-card .vs{
+    font-size:12px;
+    color:var(--muted);
+    text-align:right;
+  }
+
   .hero-amount{
     text-align:center;
     padding:18px 0 8px;
@@ -136,14 +163,14 @@
   #amount::-webkit-outer-spin-button,
   #amount::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
   #amount:focus{outline:none;}
-  #amount::placeholder{color:#3A4250;}
- 
+  #amount::placeholder{color:#C7C2B6;}
+
   .field-label{
     font-size:12px;
     color:var(--muted);
     margin:18px 0 8px;
   }
- 
+
   .chips{
     display:flex;
     gap:8px;
@@ -169,7 +196,7 @@
     border-color:var(--accent);
     font-weight:600;
   }
- 
+
   select{
     background:var(--surface);
     border:1px solid var(--line);
@@ -180,9 +207,9 @@
     width:100%;
     appearance:none;
   }
- 
+
   #descripcion{margin-top:0;}
- 
+
   #save-btn{margin-top:26px;}
   #save-feedback{
     text-align:center;
@@ -191,13 +218,13 @@
     min-height:18px;
     margin-top:8px;
   }
- 
+
   .divider{
     border:none;
     border-top:1px solid var(--line);
     margin:32px 0 18px;
   }
- 
+
   .totals{
     display:flex;
     gap:12px;
@@ -218,7 +245,7 @@
     color:var(--muted);
     margin-top:2px;
   }
- 
+
   #list-label{
     font-size:13px;
     color:var(--muted);
@@ -233,20 +260,30 @@
   }
   .entry .left .cat{font-size:15px; font-weight:500;}
   .entry .left .desc{font-size:13px; color:var(--muted); margin-top:2px;}
-  .entry .right{font-size:15px; font-weight:600; white-space:nowrap; margin-left:12px;}
+  .entry .right{font-size:15px; font-weight:600; white-space:nowrap; margin-left:12px; display:flex; align-items:center; gap:10px;}
+  .delete-btn{
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:18px;
+    line-height:1;
+    padding:4px 6px;
+    border-radius:6px;
+  }
+  .delete-btn:active{background:var(--surface-2); color:var(--danger);}
   #empty-state{
     color:var(--muted);
     font-size:14px;
     text-align:center;
     padding:24px 0;
   }
- 
+
   .hidden{display:none !important;}
 </style>
 </head>
 <body>
 <div id="app">
- 
+
   <!-- LOGIN -->
   <div id="login-screen">
     <h1>Gastos Hormiga</h1>
@@ -256,7 +293,7 @@
     <div id="login-error"></div>
     <button class="btn-primary" id="login-btn">Entrar</button>
   </div>
- 
+
   <!-- APP -->
   <div id="main-screen" class="hidden">
     <header>
@@ -266,18 +303,26 @@
       </div>
       <button id="signout">Salir</button>
     </header>
- 
+
+    <div class="compare-card">
+      <div>
+        <div class="label">Vs. ayer</div>
+        <div class="delta neutral" id="compare-delta">—</div>
+      </div>
+      <div class="vs" id="compare-detail"></div>
+    </div>
+
     <form id="gasto-form">
       <div class="hero-amount">
         <input type="number" id="amount" placeholder="0" inputmode="decimal" step="1" min="0" required>
       </div>
- 
+
       <div class="field-label">Categoría</div>
       <div class="chips" id="chips"></div>
- 
+
       <div class="field-label">Descripción (opcional)</div>
       <input type="text" id="descripcion" placeholder="Ej: café con un amigo">
- 
+
       <div class="field-label">Medio de pago</div>
       <select id="medio-pago">
         <option>Efectivo</option>
@@ -286,13 +331,13 @@
         <option>Mercado Pago</option>
         <option>Transferencia</option>
       </select>
- 
+
       <button type="submit" class="btn-primary" id="save-btn">Guardar gasto</button>
       <div id="save-feedback"></div>
     </form>
- 
+
     <hr class="divider">
- 
+
     <div class="totals">
       <div class="box">
         <div class="n" id="total-hoy">$0</div>
@@ -303,14 +348,14 @@
         <div class="l">Gastado este mes</div>
       </div>
     </div>
- 
+
     <div id="list-label">Últimos gastos</div>
     <div id="entries-list"></div>
     <div id="empty-state" class="hidden">Todavía no cargaste ningún gasto.</div>
   </div>
- 
+
 </div>
- 
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
   import {
@@ -318,9 +363,9 @@
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
   import {
     getFirestore, collection, addDoc, query, where, orderBy,
-    onSnapshot, Timestamp
+    onSnapshot, Timestamp, deleteDoc, doc
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
- 
+
   // ---------------------------------------------------------------
   // TODO: pegá acá la configuración de TU proyecto de Firebase.
   // La sacás de: Firebase Console > Configuración del proyecto > Tus apps > SDK setup.
@@ -335,17 +380,17 @@
     messagingSenderId: "693375857671",
     appId: "1:693375857671:web:10d9976add285d73baa6a2"
   };
- 
+
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
- 
+
   const CATEGORIAS = ["Café","Kiosco","Delivery","Transporte","Salidas","Antojos","Otros"];
   let selectedCategoria = CATEGORIAS[0];
   let unsubscribeEntries = null;
- 
+
   const $ = (id) => document.getElementById(id);
- 
+
   // ---------- Login ----------
   $("login-btn").addEventListener("click", async () => {
     const email = $("login-email").value.trim();
@@ -362,9 +407,9 @@
       console.error(err);
     }
   });
- 
+
   $("signout").addEventListener("click", () => signOut(auth));
- 
+
   onAuthStateChanged(auth, (user) => {
     if(user){
       $("login-screen").classList.add("hidden");
@@ -376,7 +421,7 @@
       if(unsubscribeEntries) unsubscribeEntries();
     }
   });
- 
+
   // ---------- Chips ----------
   function renderChips(){
     const wrap = $("chips");
@@ -393,42 +438,48 @@
       wrap.appendChild(chip);
     });
   }
- 
+
   // ---------- Fecha ----------
   function hoyISO(){
     const d = new Date();
     return d.toISOString().slice(0,10);
   }
+  function ayerISO(){
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0,10);
+  }
   function formatMoney(n){
     return "$" + Math.round(n).toLocaleString("es-AR");
   }
- 
+
   // ---------- Main screen ----------
   function initMainScreen(uid){
     renderChips();
     $("today-date").textContent = new Date().toLocaleDateString("es-AR", {
       weekday:"long", day:"numeric", month:"long"
     });
- 
+
     const gastosRef = collection(db, "users", uid, "gastos");
- 
+
     if(unsubscribeEntries) unsubscribeEntries();
     const q = query(gastosRef, orderBy("creadoEn", "desc"));
     unsubscribeEntries = onSnapshot(q, (snap) => {
       const items = [];
-      snap.forEach(doc => items.push(doc.data()));
-      renderList(items);
+      snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+      renderList(items, uid);
       renderTotals(items);
+      renderCompare(items);
     }, (err) => {
       console.error("Error leyendo gastos:", err);
       $("save-feedback").textContent = "No se pudo actualizar la lista, revisá tu conexión.";
     });
- 
+
     $("gasto-form").onsubmit = async (e) => {
       e.preventDefault();
       const monto = parseFloat($("amount").value);
       if(!monto || monto <= 0) return;
- 
+
       const btn = $("save-btn");
       btn.disabled = true;
       try{
@@ -452,8 +503,8 @@
       }
     };
   }
- 
-  function renderList(items){
+
+  function renderList(items, uid){
     const list = $("entries-list");
     const empty = $("empty-state");
     list.innerHTML = "";
@@ -470,12 +521,62 @@
           <div class="cat">${g.categoria}</div>
           <div class="desc">${g.descripcion ? g.descripcion : g.medioPago} · ${g.fecha}</div>
         </div>
-        <div class="right">${formatMoney(g.monto)}</div>
+        <div class="right">
+          <span>${formatMoney(g.monto)}</span>
+          <button type="button" class="delete-btn" data-id="${g.id}" aria-label="Borrar">✕</button>
+        </div>
       `;
       list.appendChild(row);
     });
+
+    list.querySelectorAll(".delete-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.getAttribute("data-id");
+        if(!confirm("¿Borrar este gasto?")) return;
+        try{
+          await deleteDoc(doc(db, "users", uid, "gastos", id));
+        }catch(err){
+          console.error(err);
+          alert("No se pudo borrar, probá de nuevo.");
+        }
+      });
+    });
   }
- 
+
+  function renderCompare(items){
+    const today = hoyISO();
+    const ayer = ayerISO();
+    let totalHoy = 0, totalAyer = 0;
+    items.forEach(g => {
+      if(g.fecha === today) totalHoy += g.monto;
+      if(g.fecha === ayer) totalAyer += g.monto;
+    });
+
+    const deltaEl = $("compare-delta");
+    const detailEl = $("compare-detail");
+    const diff = totalHoy - totalAyer;
+
+    if(totalAyer === 0 && totalHoy === 0){
+      deltaEl.textContent = "Sin gastos todavía";
+      deltaEl.className = "delta neutral";
+      detailEl.textContent = "";
+      return;
+    }
+    if(totalAyer === 0){
+      deltaEl.textContent = formatMoney(totalHoy) + " nuevo";
+      deltaEl.className = "delta up";
+      detailEl.textContent = "ayer no gastaste";
+      return;
+    }
+
+    const pct = (diff / totalAyer) * 100;
+    const sign = diff > 0 ? "+" : (diff < 0 ? "-" : "");
+    const cls = diff > 0 ? "up" : (diff < 0 ? "down" : "neutral");
+    deltaEl.textContent = `${sign}${formatMoney(Math.abs(diff))} (${sign}${Math.abs(pct).toFixed(0)}%)`;
+    deltaEl.className = "delta " + cls;
+    detailEl.textContent = `hoy ${formatMoney(totalHoy)} · ayer ${formatMoney(totalAyer)}`;
+  }
+
   function renderTotals(items){
     const today = hoyISO();
     const mesActual = today.slice(0,7); // YYYY-MM
@@ -490,4 +591,3 @@
 </script>
 </body>
 </html>
- 
