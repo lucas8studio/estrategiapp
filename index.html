@@ -37,7 +37,7 @@
     flex-direction:column;
     padding:0 20px 40px;
   }
-
+ 
   /* ---------- Login ---------- */
   #login-screen{
     display:flex;
@@ -88,7 +88,7 @@
     font-size:13px;
     min-height:18px;
   }
-
+ 
   /* ---------- Main ---------- */
   header{
     padding:24px 0 12px;
@@ -112,7 +112,7 @@
     text-decoration:underline;
     padding:4px;
   }
-
+ 
   .hero-amount{
     text-align:center;
     padding:18px 0 8px;
@@ -137,13 +137,13 @@
   #amount::-webkit-inner-spin-button{-webkit-appearance:none; margin:0;}
   #amount:focus{outline:none;}
   #amount::placeholder{color:#3A4250;}
-
+ 
   .field-label{
     font-size:12px;
     color:var(--muted);
     margin:18px 0 8px;
   }
-
+ 
   .chips{
     display:flex;
     gap:8px;
@@ -169,7 +169,7 @@
     border-color:var(--accent);
     font-weight:600;
   }
-
+ 
   select{
     background:var(--surface);
     border:1px solid var(--line);
@@ -180,9 +180,9 @@
     width:100%;
     appearance:none;
   }
-
+ 
   #descripcion{margin-top:0;}
-
+ 
   #save-btn{margin-top:26px;}
   #save-feedback{
     text-align:center;
@@ -191,13 +191,13 @@
     min-height:18px;
     margin-top:8px;
   }
-
+ 
   .divider{
     border:none;
     border-top:1px solid var(--line);
     margin:32px 0 18px;
   }
-
+ 
   .totals{
     display:flex;
     gap:12px;
@@ -218,7 +218,7 @@
     color:var(--muted);
     margin-top:2px;
   }
-
+ 
   #list-label{
     font-size:13px;
     color:var(--muted);
@@ -240,13 +240,13 @@
     text-align:center;
     padding:24px 0;
   }
-
+ 
   .hidden{display:none !important;}
 </style>
 </head>
 <body>
 <div id="app">
-
+ 
   <!-- LOGIN -->
   <div id="login-screen">
     <h1>Gastos Hormiga</h1>
@@ -256,7 +256,7 @@
     <div id="login-error"></div>
     <button class="btn-primary" id="login-btn">Entrar</button>
   </div>
-
+ 
   <!-- APP -->
   <div id="main-screen" class="hidden">
     <header>
@@ -266,18 +266,18 @@
       </div>
       <button id="signout">Salir</button>
     </header>
-
+ 
     <form id="gasto-form">
       <div class="hero-amount">
         <input type="number" id="amount" placeholder="0" inputmode="decimal" step="1" min="0" required>
       </div>
-
+ 
       <div class="field-label">Categoría</div>
       <div class="chips" id="chips"></div>
-
+ 
       <div class="field-label">Descripción (opcional)</div>
       <input type="text" id="descripcion" placeholder="Ej: café con un amigo">
-
+ 
       <div class="field-label">Medio de pago</div>
       <select id="medio-pago">
         <option>Efectivo</option>
@@ -286,13 +286,13 @@
         <option>Mercado Pago</option>
         <option>Transferencia</option>
       </select>
-
+ 
       <button type="submit" class="btn-primary" id="save-btn">Guardar gasto</button>
       <div id="save-feedback"></div>
     </form>
-
+ 
     <hr class="divider">
-
+ 
     <div class="totals">
       <div class="box">
         <div class="n" id="total-hoy">$0</div>
@@ -303,14 +303,14 @@
         <div class="l">Gastado este mes</div>
       </div>
     </div>
-
+ 
     <div id="list-label">Últimos gastos</div>
     <div id="entries-list"></div>
     <div id="empty-state" class="hidden">Todavía no cargaste ningún gasto.</div>
   </div>
-
+ 
 </div>
-
+ 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
   import {
@@ -320,7 +320,7 @@
     getFirestore, collection, addDoc, query, where, orderBy,
     onSnapshot, Timestamp
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-
+ 
   // ---------------------------------------------------------------
   // TODO: pegá acá la configuración de TU proyecto de Firebase.
   // La sacás de: Firebase Console > Configuración del proyecto > Tus apps > SDK setup.
@@ -335,17 +335,17 @@
     messagingSenderId: "693375857671",
     appId: "1:693375857671:web:10d9976add285d73baa6a2"
   };
-
+ 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-
+ 
   const CATEGORIAS = ["Café","Kiosco","Delivery","Transporte","Salidas","Antojos","Otros"];
   let selectedCategoria = CATEGORIAS[0];
   let unsubscribeEntries = null;
-
+ 
   const $ = (id) => document.getElementById(id);
-
+ 
   // ---------- Login ----------
   $("login-btn").addEventListener("click", async () => {
     const email = $("login-email").value.trim();
@@ -362,9 +362,9 @@
       console.error(err);
     }
   });
-
+ 
   $("signout").addEventListener("click", () => signOut(auth));
-
+ 
   onAuthStateChanged(auth, (user) => {
     if(user){
       $("login-screen").classList.add("hidden");
@@ -376,7 +376,7 @@
       if(unsubscribeEntries) unsubscribeEntries();
     }
   });
-
+ 
   // ---------- Chips ----------
   function renderChips(){
     const wrap = $("chips");
@@ -393,7 +393,7 @@
       wrap.appendChild(chip);
     });
   }
-
+ 
   // ---------- Fecha ----------
   function hoyISO(){
     const d = new Date();
@@ -402,30 +402,33 @@
   function formatMoney(n){
     return "$" + Math.round(n).toLocaleString("es-AR");
   }
-
+ 
   // ---------- Main screen ----------
   function initMainScreen(uid){
     renderChips();
     $("today-date").textContent = new Date().toLocaleDateString("es-AR", {
       weekday:"long", day:"numeric", month:"long"
     });
-
+ 
     const gastosRef = collection(db, "users", uid, "gastos");
-
+ 
     if(unsubscribeEntries) unsubscribeEntries();
-    const q = query(gastosRef, orderBy("fecha", "desc"), orderBy("creadoEn", "desc"));
+    const q = query(gastosRef, orderBy("creadoEn", "desc"));
     unsubscribeEntries = onSnapshot(q, (snap) => {
       const items = [];
       snap.forEach(doc => items.push(doc.data()));
       renderList(items);
       renderTotals(items);
+    }, (err) => {
+      console.error("Error leyendo gastos:", err);
+      $("save-feedback").textContent = "No se pudo actualizar la lista, revisá tu conexión.";
     });
-
+ 
     $("gasto-form").onsubmit = async (e) => {
       e.preventDefault();
       const monto = parseFloat($("amount").value);
       if(!monto || monto <= 0) return;
-
+ 
       const btn = $("save-btn");
       btn.disabled = true;
       try{
@@ -449,7 +452,7 @@
       }
     };
   }
-
+ 
   function renderList(items){
     const list = $("entries-list");
     const empty = $("empty-state");
@@ -472,7 +475,7 @@
       list.appendChild(row);
     });
   }
-
+ 
   function renderTotals(items){
     const today = hoyISO();
     const mesActual = today.slice(0,7); // YYYY-MM
@@ -487,3 +490,4 @@
 </script>
 </body>
 </html>
+ 
